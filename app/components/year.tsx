@@ -5,8 +5,9 @@ import isThisYear from "date-fns/isThisYear";
 
 type Props = {
   year: string;
+  currentYear: string;
 };
-export function YearComponent({ year }: Props) {
+export function YearComponent({ currentYear, year }: Props) {
   const d = new Date(Number(year), 5, 5);
 
   const _isThisYear = isThisYear(d);
@@ -28,7 +29,13 @@ export function YearComponent({ year }: Props) {
       <ListItemButton onClick={() => handleClick(year)}>
         <ListItemText
           primary={year}
-          sx={{ color: _isThisYear ? "green" : "unset" }}
+          sx={{
+            color: _isThisYear
+              ? "green"
+              : currentYear === year
+              ? "#8bc34a"
+              : "unset",
+          }}
         />
       </ListItemButton>
     </React.Fragment>

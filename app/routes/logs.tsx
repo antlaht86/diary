@@ -5,6 +5,7 @@ import {
   Outlet,
   redirect,
   useLoaderData,
+  useParams,
 } from "remix";
 import * as React from "react";
 import List from "@mui/material/List";
@@ -79,6 +80,10 @@ type Props = {};
 
 export default function Logs(props: Props) {
   const logs = useLoaderData<{ count: number; year: string }[]>();
+  const params = useParams();
+  console.log("🤡 params: ", params);
+
+  invariant(params.year, "missing year params");
   const [showNewInput, setShowNewInput] = React.useState(false);
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
@@ -103,7 +108,13 @@ export default function Logs(props: Props) {
         }}
       >
         {logs.map((item) => {
-          return <YearComponent key={item.year} year={item.year} />;
+          return (
+            <YearComponent
+              key={item.year}
+              year={item.year}
+              currentYear={params.year ?? "0"}
+            />
+          );
         })}
       </List>
       <Divider sx={{ margin: "10px 0px" }} />

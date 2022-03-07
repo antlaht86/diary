@@ -16,11 +16,7 @@ export function MonthComponent({ count, date }: Props) {
   let navigate = useNavigate();
 
   const d = new Date(Number(year), Number(month) - 1, 5);
-  console.log("🤡 d: ", d);
-
   const _isThisMonth = isThisMonth(d);
-
-  console.log("🤡 _isThisMonth: ", _isThisMonth);
 
   const handleClick = (value: string) => {
     if ("year" in params && "month" in params) {
@@ -33,7 +29,13 @@ export function MonthComponent({ count, date }: Props) {
       <ListItemButton onClick={() => handleClick(date)} alignItems="center">
         <ListItemText
           primary={getMonthToUi(date)}
-          sx={{ color: _isThisMonth ? "green" : "unset" }}
+          sx={{
+            color: _isThisMonth
+              ? "green"
+              : params.month === getMonthToUi(date)
+              ? "#8bc34a"
+              : "unset",
+          }}
         />
         <Typography align="center" sx={{ fontSize: "10px", marginLeft: "2px" }}>
           ({count})
