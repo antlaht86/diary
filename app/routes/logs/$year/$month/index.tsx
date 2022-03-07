@@ -1,10 +1,4 @@
-import {
-  ActionFunction,
-  LoaderFunction,
-  redirect,
-  useActionData,
-  useLoaderData,
-} from "remix";
+import { ActionFunction, LoaderFunction, redirect, useLoaderData } from "remix";
 import invariant from "tiny-invariant";
 import { db } from "~/db/db";
 import { addHours, endOfMonth, format, startOfMonth } from "date-fns";
@@ -15,6 +9,7 @@ import { Box, Divider } from "@mui/material";
 import NewLogButton from "~/components/newLogButton";
 import NewLog from "~/components/newLog";
 import { useState } from "react";
+import isSameDay from "date-fns/isSameDay";
 
 export const loader: LoaderFunction = ({ params }) => {
   invariant(params.year, "Expected params.year");
@@ -40,7 +35,6 @@ export const loader: LoaderFunction = ({ params }) => {
 
 export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
-  console.log("🤡 params: ", params);
 
   const action = formData.get("_action")?.toString();
   const datetime = formData.get("datetime")?.toString();
@@ -65,14 +59,17 @@ export const action: ActionFunction = async ({ request, params }) => {
       break;
     }
 
-    case "update": {
+    case "edit": {
       invariant(id, "missing id");
       invariant(text, "missing text");
 
-      await db.log.deleteMany({
+      await db.log.updateMany({
         where: {
           user_id: user.id,
           id,
+        },
+        data: {
+          text,
         },
       });
       break;
@@ -101,6 +98,7 @@ export default function MonthPage() {
   const logs = useLoaderData<Log[]>();
   const days = getDays(logs);
   const [addNew, setAddNew] = useState(0);
+  const [edit, setEdit] = useState(0);
 
   function handleShowAddContent(day: number) {
     setAddNew(day === addNew ? 0 : day);
@@ -117,15 +115,25 @@ export default function MonthPage() {
           );
 
           const d = new Date(_logs[0].created_at);
+          const currentDay = new Date();
+
+          const _isSameDay = isSameDay(currentDay, d);
+
           return (
             <List
               key={item.toString()}
               subheader={
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <span>{format(d, "d/M/yyyy")}</span>
+                  <Box
+                    component={"span"}
+                    sx={{ color: _isSameDay ? "green" : "unset" }}
+                  >
+                    {format(d, "d.M.yyyy")}
+                  </Box>
                   <NewLogButton
-                    handleShowAddContent={handleShowAddContent}
                     day={item}
+                    handleShowAddContent={handleShowAddContent}
+                    selectedDay={addNew}
                   />
                 </Box>
               }
@@ -138,7 +146,12 @@ export default function MonthPage() {
                 />
               )}
               {_logs.map((log) => (
-                <DayComponent key={log.id} log={log} />
+                <DayComponent
+                  key={log.id}
+                  log={log}
+                  setEdit={setEdit}
+                  edit={edit === log.id}
+                />
               ))}
               <Divider sx={{ margin: "5px 0px" }} />
             </List>

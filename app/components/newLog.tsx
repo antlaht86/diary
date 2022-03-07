@@ -1,5 +1,4 @@
-import { SaveAlt } from "@mui/icons-material";
-import { IconButton, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import { useEffect } from "react";
 import { useFetcher } from "remix";
 
@@ -20,22 +19,32 @@ export default function NewLog({ datetime, day, handleShowAddContent }: Props) {
 
   return (
     <fetcher.Form method="post">
-      <TextField
-        id="outlined-textarea"
-        name="text"
-        label="Text"
-        multiline
-        rows={5}
-      />
-      <input type="hidden" name="datetime" defaultValue={datetime} />
-      <IconButton
-        type="submit"
-        name="_action"
-        value={"create"}
-        aria-label="create"
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+        }}
       >
-        <SaveAlt />
-      </IconButton>
+        <TextField
+          fullWidth
+          id="outlined-textarea"
+          name="text"
+          label="Text"
+          multiline
+          rows={5}
+        />
+        <input type="hidden" name="datetime" defaultValue={datetime} />
+        <Button
+          sx={{ width: "100px", marginTop: "10px" }}
+          type="submit"
+          name="_action"
+          value={"create"}
+          aria-label="create"
+        >
+          Save
+        </Button>
+      </Box>
     </fetcher.Form>
   );
 }

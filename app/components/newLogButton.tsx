@@ -1,18 +1,25 @@
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
+import Clear from "@mui/icons-material/Clear";
 type Props = {
-  handleShowAddContent: (arg: number) => void;
   day: number;
+
+  handleShowAddContent: (arg: number) => void;
+  selectedDay: number;
 };
 
-export default function NewLog({ day, handleShowAddContent }: Props) {
+export default function NewLog({
+  day,
+  handleShowAddContent,
+  selectedDay,
+}: Props) {
   return (
     <IconButton
       onClick={() => handleShowAddContent(day)}
       type="button"
       value={"create"}
     >
-      <AddIcon />
+      {selectedDay === day ? <Clear /> : <AddIcon />}
     </IconButton>
   );
 }

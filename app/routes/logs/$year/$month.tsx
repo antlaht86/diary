@@ -1,15 +1,10 @@
 import { List } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import {
-  ActionFunction,
-  LoaderFunction,
-  Outlet,
-  useLoaderData,
-  useParams,
-} from "remix";
+import { LoaderFunction, Outlet, useLoaderData, useParams } from "remix";
 import invariant from "tiny-invariant";
 import { MonthComponent } from "~/components/month";
 import { db } from "~/db/db";
+import isThisYear from "date-fns/isThisYear";
 
 export const loader: LoaderFunction = ({ params }) => {
   invariant(params.year, "Expected params.year");
@@ -41,7 +36,7 @@ export default function Year() {
           margin: "0px",
         }}
       >
-        {[...Array(12).keys()].map((_monthNumber) => {
+        {getMonths(params.year).map((_monthNumber) => {
           const monthNumber = _monthNumber + 1;
 
           const item = logs.find(
@@ -56,8 +51,16 @@ export default function Year() {
           );
         })}
       </List>
-
       <Outlet />
     </div>
   );
+}
+
+function getMonths(year: string) {
+  const x = isThisYear(new Date(Number(year), 5, 5));
+  if (!x) return [...Array(12).keys()];
+
+  const d = new Date();
+
+  return [...Array(d.getMonth() + 1).keys()];
 }
