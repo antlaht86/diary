@@ -15,6 +15,7 @@ export default function NewLog({
 }: Props) {
   return (
     <IconButton
+      sx={{ color: (theme) => theme.palette.primary.light }}
       onClick={() => handleShowAddContent(day)}
       type="button"
       value={"create"}

@@ -10,31 +10,44 @@ import {
 import * as React from "react";
 import List from "@mui/material/List";
 
-import { Log, Prisma } from "@prisma/client";
+import { Log, Prisma, User } from "@prisma/client";
 import { db } from "~/db";
 import { Box, Button, Divider } from "@mui/material";
 import NewLogDialog from "~/components/newLogDialog";
 import invariant from "tiny-invariant";
+import { requireUserId } from "~/utils/session";
 
-export const loader: LoaderFunction = () => {
-  return db.$queryRaw(
-    Prisma.sql`SELECT COUNT(id), to_char(created_at,  'YYYY') as year FROM "public"."Log"
+export const loader: LoaderFunction = async ({ request }) => {
+  const userId = await requireUserId(request);
+
+  const user = await db.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  const data = await db.$queryRaw(
+    Prisma.sql`SELECT COUNT(id), to_char(created_at,  'YYYY') as year FROM "public"."Log" 
+    WHERE user_id = ${userId}
     GROUP BY year
     ORDER BY year ASC
     ;`
   );
+
+  return { data, user };
 };
 
-export const action: ActionFunction = async ({ request, params }) => {
+export const action: ActionFunction = async ({ request }) => {
+  const userId = await requireUserId(request);
+
   const formData = await request.formData();
 
   const action = formData.get("_action")?.toString();
   const text = formData.get("text")?.toString();
   const datetime = formData.get("datetime")?.toString();
 
-  const user = await db.user.findFirst();
   let newLog: Log | null = null;
-  invariant(user, "missing user");
+
   invariant(action, "missing action");
 
   const getCreatedAt = (d: Date) => {
@@ -58,7 +71,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       newLog = await db.log.create({
         data: {
           text,
-          user_id: user.id,
+          user_id: userId,
           created_at: datetime ? getCreatedAt(new Date(datetime)) : undefined,
         },
       });
@@ -77,11 +90,13 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 type Props = {};
-
+type LoaderData = {
+  data: { count: number; year: string }[];
+  user: User;
+};
 export default function Logs(props: Props) {
-  const logs = useLoaderData<{ count: number; year: string }[]>();
+  const logs = useLoaderData<LoaderData>();
   const params = useParams();
-  console.log("🤡 params: ", params);
 
   invariant(params.year, "missing year params");
   const [showNewInput, setShowNewInput] = React.useState(false);
@@ -93,9 +108,15 @@ export default function Logs(props: Props) {
           handleClose={() => setShowNewInput(false)}
         />
       )}
-      <Box sx={{ display: "flex" }}>
-        <h1>Diary</h1>
-        <Button onClick={() => setShowNewInput(true)}>New</Button>
+      <Box>
+        <Box sx={{ display: "flex" }}>
+          <h1 style={{ textTransform: "capitalize" }}>
+            {logs.user.username}'s Diary
+          </h1>
+          <Button color="primary" onClick={() => setShowNewInput(true)}>
+            New
+          </Button>
+        </Box>
       </Box>
 
       <List
@@ -107,7 +128,7 @@ export default function Logs(props: Props) {
           margin: "0px",
         }}
       >
-        {logs.map((item) => {
+        {logs.data.map((item) => {
           return (
             <YearComponent
               key={item.year}

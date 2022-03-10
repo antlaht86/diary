@@ -6,12 +6,14 @@ import {
   StyledEngineProvider,
   ThemeProvider,
 } from "@mui/material";
-import { orange } from "@mui/material/colors";
+import { green, red } from "@mui/material/colors";
 
-const primary: PaletteColorOptions = orange;
+const primary: PaletteColorOptions = green;
+const secondary: PaletteColorOptions = red;
 export const primaryTheme = createTheme({
   palette: {
     primary,
+    secondary,
   },
 });
 

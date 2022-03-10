@@ -12,6 +12,7 @@ export default function DeleteLog({ id }: Props) {
     <fetcher.Form method="post">
       <input type={"hidden"} defaultValue={id} name={"id"} />
       <IconButton
+        sx={{ color: (theme) => theme.palette.secondary.light }}
         type="submit"
         name="_action"
         value={"delete"}

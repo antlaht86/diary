@@ -5,13 +5,16 @@ import invariant from "tiny-invariant";
 import { MonthComponent } from "~/components/month";
 import { db } from "~/db/db";
 import isThisYear from "date-fns/isThisYear";
+import { requireUserId } from "~/utils/session";
 
-export const loader: LoaderFunction = ({ params }) => {
+export const loader: LoaderFunction = async ({ params, request }) => {
+  const userId = await requireUserId(request);
+
   invariant(params.year, "Expected params.year");
 
   return db.$queryRaw(
     Prisma.sql`SELECT COUNT(id), to_char(created_at,  'YYYY-MM') as date FROM "public"."Log"
-      WHERE to_char(created_at,  'YYYY') = ${params.year}
+      WHERE to_char(created_at,  'YYYY') = ${params.year} AND user_id = ${userId}
       GROUP BY date
       ORDER BY date ASC
       ;`

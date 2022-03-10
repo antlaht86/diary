@@ -7,7 +7,11 @@ type Props = {
 
 export default function EditLogButton({ logId, setEdit }: Props) {
   return (
-    <IconButton onClick={() => setEdit(logId)} type="button">
+    <IconButton
+      sx={{ color: (theme) => theme.palette.primary.light }}
+      onClick={() => setEdit(logId)}
+      type="button"
+    >
       <EditIcon />
     </IconButton>
   );

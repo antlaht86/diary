@@ -10,8 +10,11 @@ import NewLogButton from "~/components/newLogButton";
 import NewLog from "~/components/newLog";
 import { useState } from "react";
 import isSameDay from "date-fns/isSameDay";
+import { requireUserId } from "~/utils/session";
 
-export const loader: LoaderFunction = ({ params }) => {
+export const loader: LoaderFunction = async ({ params, request }) => {
+  const userId = await requireUserId(request);
+
   invariant(params.year, "Expected params.year");
   invariant(params.month, "Expected params.year");
 
@@ -26,6 +29,8 @@ export const loader: LoaderFunction = ({ params }) => {
         gt: start,
         lt: end,
       },
+
+      user_id: userId,
     },
     orderBy: {
       created_at: "asc",
@@ -126,7 +131,10 @@ export default function MonthPage() {
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Box
                     component={"span"}
-                    sx={{ color: _isSameDay ? "green" : "unset" }}
+                    sx={{
+                      color: _isSameDay ? "green" : "unset",
+                      marginLeft: "7px",
+                    }}
                   >
                     {format(d, "d.M.yyyy")}
                   </Box>
